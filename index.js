@@ -30,14 +30,6 @@ class MoveGenerator {
   }
 }
 
-class HMACCalculator {
-  calculateHMAC(move, key) {
-    const hmac = crypto.createHmac("sha256", key);
-    hmac.update(move.getName());
-    return hmac.digest("hex");
-  }
-}
-
 class GameRules {
   constructor(moves) {
     this.moves = moves;
@@ -64,45 +56,6 @@ class GameRules {
   }
 }
 
-class HelpTableGenerator {
-  constructor(moves) {
-    this.moves = moves;
-    this.movesCount = moves.length;
-  }
-
-  generateHelpTable() {
-    const table = [];
-    const headerRow = [""].concat(this.moves.map((move) => move.getName()));
-    table.push(headerRow.join("\t"));
-
-    for (let i = 0; i < this.movesCount; i++) {
-      const row = [this.moves[i].getName()];
-
-      for (let j = 0; j < this.movesCount; j++) {
-        const result = this.determineWinnerText(this.moves[i], this.moves[j]);
-        row.push(result);
-      }
-
-      table.push(row.join("\t"));
-    }
-
-    return table.join("\n");
-  }
-
-  determineWinnerText(move1, move2) {
-    const gameRules = new GameRules(this.moves);
-    const result = gameRules.determineWinner(move1, move2);
-
-    if (result === "Draw") {
-      return "Draw";
-    } else if (result === "You win!") {
-      return "Win";
-    } else {
-      return "Lose";
-    }
-  }
-}
-
 function displayMoves(moves) {
   console.log("Available moves:");
   moves.forEach((move, index) => {
@@ -121,8 +74,7 @@ function getUserChoice(moves) {
   }
 
   if (choice === "?") {
-    const helpTableGenerator = new HelpTableGenerator(moves);
-    console.log(helpTableGenerator.generateHelpTable());
+    displayMoves(moves);
     return getUserChoice(moves);
   }
 
@@ -136,21 +88,15 @@ function getUserChoice(moves) {
 
 function playGame(moves) {
   const moveGenerator = new MoveGenerator();
-  const hmacCalculator = new HMACCalculator();
 
   console.log(`HMAC key: ${moveGenerator.generateKey()}`);
+  displayMoves(moves);
 
   while (true) {
     const userChoice = getUserChoice(moves);
     const userMove = moves[userChoice - 1];
     const computerMove = moveGenerator.generateMove(moves);
-    const hmac = hmacCalculator.calculateHMAC(
-      computerMove,
-      moveGenerator.generateKey()
-    );
 
-    console.log(`HMAC: ${hmac}`);
-    displayMoves(moves);
     console.log(`Your move: ${userMove.getName()}`);
     console.log(`Computer move: ${computerMove.getName()}`);
 
@@ -159,6 +105,7 @@ function playGame(moves) {
 
     console.log(result);
     console.log(`HMAC key: ${moveGenerator.generateKey()}`);
+    process.exit(1);
   }
 }
 
