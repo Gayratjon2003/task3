@@ -88,14 +88,14 @@ function getUserChoice(moves) {
 
 function playGame(moves) {
   const moveGenerator = new MoveGenerator();
-
-  console.log(`HMAC key: ${moveGenerator.generateKey()}`);
-  displayMoves(moves);
-
+  let secretKey = moveGenerator.generateKey();
+  
   while (true) {
+    const computerMove = moveGenerator.generateMove(moves);
+    console.log(`HMAC: ${moveGenerator.generateKey()}`);
+    displayMoves(moves);
     const userChoice = getUserChoice(moves);
     const userMove = moves[userChoice - 1];
-    const computerMove = moveGenerator.generateMove(moves);
 
     console.log(`Your move: ${userMove.getName()}`);
     console.log(`Computer move: ${computerMove.getName()}`);
@@ -104,7 +104,8 @@ function playGame(moves) {
     const result = gameRules.determineWinner(userMove, computerMove);
 
     console.log(result);
-    console.log(`HMAC key: ${moveGenerator.generateKey()}`);
+    console.log(`HMAC key: ${secretKey}`);
+
     process.exit(1);
   }
 }
